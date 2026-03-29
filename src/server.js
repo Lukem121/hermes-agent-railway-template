@@ -307,7 +307,23 @@ function setupHtml() {
         }
       }
 
-      async function refresh() {
+      /** Updates gateway/Telegram indicators only — does not touch inputs (avoids wiping unsaved edits). */
+      async function refreshStatus() {
+        try {
+          const res = await fetch("/setup/api/status");
+          const j = await res.json();
+          health.className = "status " + (j.hermesReady ? "ok" : "warn");
+          health.textContent = j.hermesReady ? "ready" : "starting";
+          telegram.className = "status " + (j.telegramConfigured ? "ok" : "warn");
+          telegram.textContent = j.telegramConfigured ? "configured" : "not configured";
+        } catch (e) {
+          health.className = "status warn";
+          health.textContent = "unreachable";
+        }
+      }
+
+      /** Loads saved config from server into the form. Use on first load, after Save, or Reload — not on a timer. */
+      async function loadFormFromServer() {
         try {
           const res = await fetch("/setup/api/status");
           const j = await res.json();
@@ -331,12 +347,12 @@ function setupHtml() {
         });
         const j = await res.json();
         output.textContent = j.output || JSON.stringify(j, null, 2);
-        await refresh();
+        await loadFormFromServer();
       };
 
-      document.getElementById("refreshBtn").onclick = refresh;
-      refresh();
-      setInterval(refresh, 8000);
+      document.getElementById("refreshBtn").onclick = () => loadFormFromServer();
+      loadFormFromServer();
+      setInterval(refreshStatus, 8000);
     </script>
   </body>
 </html>`;
