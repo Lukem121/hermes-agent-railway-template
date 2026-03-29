@@ -1,0 +1,15 @@
+{
+  "name": "hermes-agent-railway-template-wrapper",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "http-proxy": "^1.18.1"
+  }
+}
