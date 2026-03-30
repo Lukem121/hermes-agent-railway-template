@@ -199,12 +199,14 @@ function setupHtml() {
       .warn { color:#facc15; border-color:#69561d; }
       .callout { background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:14px 16px; margin-bottom:16px; font-size:13px; color:#c4c4c4; }
       .callout strong { color:#e5e5e5; }
+      .template-help { margin:-6px 0 16px 0; font-size:13px; }
     </style>
   </head>
   <body>
     <div class="card">
       <h1>Hermes Setup</h1>
       <p class="sub">No-code setup. Saves to <code>${ENV_FILE}</code> and restarts the gateway.</p>
+      <p class="muted template-help">Having trouble with this template? <a href="https://github.com/Lukem121/hermes-agent-railway-template/issues" target="_blank" rel="noopener">Open an issue on GitHub</a>.</p>
 
       <div class="callout">
         <strong>How you talk to Hermes on this deploy</strong><br />
