@@ -32,14 +32,19 @@ The provided `railway.toml` configures Docker build, start command, and health c
 
 ## Setup page (no-code)
 
-The UI walks through:
+Minimum to get chatting on Telegram: **LLM** + **Telegram**, then **Save**. Everything below that is optional.
 
 1. **LLM** — e.g. `OPENROUTER_API_KEY` and `LLM_MODEL`.
-2. **Telegram** — `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, optional `TELEGRAM_HOME_CHANNEL` / `TELEGRAM_HOME_CHANNEL_NAME`.
-3. **HTTP API** — `API_SERVER_KEY`, `GATEWAY_ALLOW_ALL_USERS`.
-4. **Optional** — Discord / Slack.
+2. **Telegram** — `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, optional home channel fields.
+3. **Optional** — Discord / Slack.
+4. **Optional (advanced)** — `API_SERVER_KEY` and `GATEWAY_ALLOW_ALL_USERS` (see below). Skip if you only use Telegram with an allowlist.
 
 Values are written to `${HERMES_HOME}/.env` and the gateway is restarted.
+
+## What “HTTP API” and “gateway allow all users” mean
+
+- **`API_SERVER_KEY`** — Password for Hermes’s **OpenAI-compatible HTTP API** on your public URL (`/v1/chat/completions`, `/v1/models`, etc.). Clients send `Authorization: Bearer <API_SERVER_KEY>`. Use a long random value on Railway so the API is not anonymously callable. This is separate from Telegram.
+- **`GATEWAY_ALLOW_ALL_USERS`** — Controls **messaging** (Telegram, Discord, Slack): whether *anyone* can talk to the bot. Keep `false` and use allowlists (e.g. `TELEGRAM_ALLOWED_USERS`) unless you fully understand the risk.
 
 ## Hermes API usage after deploy
 

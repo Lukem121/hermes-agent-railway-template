@@ -248,28 +248,34 @@ function setupHtml() {
       </div>
 
       <div class="step">
-        <div class="title">3 — HTTP API &amp; access</div>
-        <p class="muted">Protects <code>/v1/*</code> when set. Keep <code>GATEWAY_ALLOW_ALL_USERS</code> false for Telegram bots with tools unless you know what you are doing.</p>
-        <div class="grid">
-          <div><label>API_SERVER_KEY</label><input id="API_SERVER_KEY" autocomplete="off" /></div>
-          <div>
-            <label>GATEWAY_ALLOW_ALL_USERS</label>
-            <select id="GATEWAY_ALLOW_ALL_USERS">
-              <option value="false">false (recommended)</option>
-              <option value="true">true (public)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="title">4 — Other platforms (optional)</div>
+        <div class="title">3 — Other messaging platforms (optional)</div>
+        <p class="muted">Skip if you only use Telegram.</p>
         <div class="grid">
           <div><label>DISCORD_BOT_TOKEN</label><input id="DISCORD_BOT_TOKEN" autocomplete="off" /></div>
           <div><label>DISCORD_ALLOWED_USERS</label><input id="DISCORD_ALLOWED_USERS" /></div>
           <div><label>SLACK_BOT_TOKEN</label><input id="SLACK_BOT_TOKEN" autocomplete="off" /></div>
           <div><label>SLACK_APP_TOKEN</label><input id="SLACK_APP_TOKEN" autocomplete="off" /></div>
           <div><label>SLACK_ALLOWED_USERS</label><input id="SLACK_ALLOWED_USERS" /></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="title">Optional — Advanced: HTTP API &amp; messaging access</div>
+        <p class="muted">
+          <strong>You do not need to fill this out</strong> for a normal Telegram-only setup. Configure LLM + Telegram above, click Save, and you are done.<br /><br />
+          Use this block when you want to (a) <strong>password-protect</strong> the OpenAI-compatible web API (<code>/v1/*</code> on this same URL), and/or (b) change who may use Telegram/Discord/Slack bots at the gateway level.<br /><br />
+          <strong>API server key</strong> — Password for the HTTP API. Clients send <code>Authorization: Bearer &lt;key&gt;</code>. On a public URL, setting a random key stops strangers from using your API. Leave empty if you only use Telegram and accept that the API may be reachable without auth (not ideal on the public internet).<br /><br />
+          <strong>Gateway allow all users</strong> — <code>false</code> = only IDs in your allowlists (e.g. <code>TELEGRAM_ALLOWED_USERS</code>). <code>true</code> = anyone can message your bots (risky with tools).
+        </p>
+        <div class="grid">
+          <div><label>API_SERVER_KEY (optional — lock <code>/v1/*</code>)</label><input id="API_SERVER_KEY" placeholder="leave blank if unused" autocomplete="off" /></div>
+          <div>
+            <label>GATEWAY_ALLOW_ALL_USERS (optional — defaults to allowlist-only)</label>
+            <select id="GATEWAY_ALLOW_ALL_USERS">
+              <option value="false">false — only allowlisted users (recommended)</option>
+              <option value="true">true — anyone can message (risky)</option>
+            </select>
+          </div>
         </div>
       </div>
 
