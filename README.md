@@ -2,9 +2,9 @@
 
 One-click deploy for [Hermes Agent](https://github.com/NousResearch/hermes-agent) on [Railway](https://railway.com), with a built-in web setup page at `/setup` so users do not need shell access.
 
-[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/QDy5vn?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-1?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
-Template URL: https://railway.com/deploy/QDy5vn?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic
+Template URL: https://railway.com/deploy/hermes-agent-1?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic
 
 ## How users actually interact with Hermes
 
