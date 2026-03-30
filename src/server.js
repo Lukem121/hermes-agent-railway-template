@@ -425,6 +425,10 @@ app.post("/setup/api/save", async (req, res) => {
   });
 });
 
+app.get("/", (_req, res) => {
+  res.redirect(302, "/setup");
+});
+
 app.use((req, res) => {
   proxy.web(req, res);
 });
