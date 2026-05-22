@@ -1,7 +1,7 @@
-FROM debian:13.4
+FROM debian:bookworm-slim
 
 ARG HERMES_REPO=https://github.com/NousResearch/hermes-agent.git
-ARG HERMES_REF=v2026.3.28
+ARG HERMES_REF=v2026.5.16
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -15,23 +15,32 @@ RUN apt-get update \
     npm \
     python3 \
     python3-dev \
-    python3-pip \
     python3-venv \
     ripgrep \
     && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /opt
 RUN git clone --depth 1 --branch "${HERMES_REF}" "${HERMES_REPO}" hermes
 
 WORKDIR /opt/hermes
-RUN pip3 install -e ".[messaging,cron,mcp,pty,honcho]" --break-system-packages
+RUN uv venv .venv
+
+ENV VIRTUAL_ENV=/opt/hermes/.venv
+ENV PATH="/opt/hermes/.venv/bin:/root/.local/bin:${PATH}"
+
+RUN uv pip install -e ".[messaging,cron,mcp,pty,honcho]"
 RUN npm install --omit=dev
-RUN if [ -d /opt/hermes/scripts/whatsapp-bridge ]; then cd /opt/hermes/scripts/whatsapp-bridge && npm install --omit=dev; fi
+RUN if [ -d /opt/hermes/scripts/whatsapp-bridge ]; then \
+      cd /opt/hermes/scripts/whatsapp-bridge && npm install --omit=dev; \
+    fi
 
 WORKDIR /wrapper
-COPY package.json /wrapper/package.json
-RUN npm install --omit=dev
-COPY src /wrapper/src
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+COPY src ./src
 
 ENV HERMES_HOME=/data/hermes
 

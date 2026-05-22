@@ -1,72 +1,85 @@
-# Hermes Agent Railway Template
+# Hermes Agent Railway Template (v2)
 
-One-click deploy for [Hermes Agent](https://github.com/NousResearch/hermes-agent) on [Railway](https://railway.com), with a built-in web setup page at `/setup` so users do not need shell access.
+One-click deploy for [Hermes Agent](https://github.com/NousResearch/hermes-agent) **v2026.5.16** (v0.14.0) on [Railway](https://railway.com), with a built-in setup UI at `/setup`.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/hermes-agent-1?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
-Template URL: https://railway.com/deploy/hermes-agent-1?referralCode=uXzB-u&utm_medium=integration&utm_source=template&utm_campaign=generic
+## Fresh deploy only
 
-## How users actually interact with Hermes
+This is a **v2 greenfield** template. Use a **new Railway service** and a **new volume** at `/data/hermes`. Upgrading an old deploy by redeploying the same volume is not supported.
 
-Hermes can be used in more than one way:
+## What you get
 
-| Where | What you do |
-| ----- | ------------- |
-| **Local install** | Run `hermes` in a terminal for the interactive TUI — that is the flow in the [Quickstart](https://hermes-agent.nousresearch.com/docs/getting-started/quickstart). |
-| **This Railway template** | Runs the **messaging gateway** 24/7. You do **not** SSH in to chat. You talk to the agent through **Telegram** (recommended), **Discord**, **Slack**, or the **OpenAI-compatible HTTP API** (`/v1/chat/completions`, etc.) on your public URL. |
+- Hermes **messaging gateway** + OpenAI-compatible **HTTP API** on your public URL
+- Web setup at **`/setup`** (no shell required)
+- Platform webhook proxy on the same port:
+  - **Teams** → `/api/messages`
+  - **Telegram webhooks** → path from `TELEGRAM_WEBHOOK_URL` (default `/telegram`)
+  - **Hermes webhooks** → `/webhooks/*`
+- Hermes API + health → everything else proxied to internal port `8642`
 
-So for a typical team deploy: open `/setup`, add an LLM key and Telegram bot token, save, then **open Telegram and message your bot** — that is the main “chat UI.”
+## Quick start
 
-Official Telegram reference (BotFather, privacy mode in groups, home channel, voice, troubleshooting): [Telegram setup](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram). Team walkthrough: [Team Telegram assistant](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant). Overview: [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging).
+1. Deploy from the Railway button (or fork this repo and connect it).
+2. Add a **volume** mounted at **`/data/hermes`**.
+3. Open **`https://<your-service>/setup`**.
+4. Set **OpenRouter API key** + **model** (writes `config.yaml`), then **Telegram** bot token + allowed user IDs.
+5. Click **Save and restart gateway**.
+6. Message your bot on Telegram.
 
-## What this template deploys
+## How you chat
 
-- A Dockerized Hermes runtime pinned to a release tag (`HERMES_REF` in `Dockerfile`).
-- A wrapper server that starts `hermes gateway run`, serves `/setup`, and proxies API traffic to Hermes’s internal API server.
-- Hermes API server (OpenAI-compatible) for health checks and programmatic use.
-- Persistent Hermes home at `/data/hermes` (attach a Railway volume here).
+| Surface | How |
+| -------- | ----- |
+| **Telegram** (recommended) | Message your bot after `/setup` |
+| **Discord / Slack / Teams** | Configure tokens in `/setup` |
+| **HTTP API** | `POST /v1/chat/completions` with `Authorization: Bearer <API_SERVER_KEY>` |
 
-## Required Railway setup
+This template does **not** run the interactive terminal `hermes` TUI on the server.
 
-1. Create a service from this template.
-2. Add a **volume** mounted at `/data/hermes`.
-3. Deploy and open **`/setup`** to configure LLM + Telegram (and optional API key).
+Docs: [Telegram](https://hermes-agent.nousresearch.com/docs/user-guide/messaging/telegram) · [Messaging gateway](https://hermes-agent.nousresearch.com/docs/user-guide/messaging) · [Team Telegram guide](https://hermes-agent.nousresearch.com/docs/guides/team-telegram-assistant)
 
-The provided `railway.toml` configures Docker build, start command, and health check `/setup/healthz`.
+## Configuration model
 
-## Setup page (no-code)
+| Storage | Contents |
+| -------- | --------- |
+| `${HERMES_HOME}/.env` | API keys, bot tokens, gateway flags |
+| `${HERMES_HOME}/config.yaml` | `model.default` and other Hermes config |
 
-Minimum to get chatting on Telegram: **LLM** + **Telegram**, then **Save**. Everything below that is optional.
+The setup UI writes both. **`LLM_MODEL` in `.env` is not used** (Hermes v0.14+).
 
-1. **LLM** — e.g. `OPENROUTER_API_KEY` and `LLM_MODEL`.
-2. **Telegram** — `TELEGRAM_BOT_TOKEN`, `TELEGRAM_ALLOWED_USERS`, optional home channel fields.
-3. **Optional** — Discord / Slack.
-4. **Optional (advanced)** — `API_SERVER_KEY` and `GATEWAY_ALLOW_ALL_USERS` (see below). Skip if you only use Telegram with an allowlist.
+## Teams on Railway
 
-Values are written to `${HERMES_HOME}/.env` and the gateway is restarted.
+Register your bot messaging endpoint as:
 
-## What “HTTP API” and “gateway allow all users” mean
+```text
+https://<your-railway-domain>/api/messages
+```
 
-- **`API_SERVER_KEY`** — Password for Hermes’s **OpenAI-compatible HTTP API** on your public URL (`/v1/chat/completions`, `/v1/models`, etc.). Clients send `Authorization: Bearer <API_SERVER_KEY>`. Use a long random value on Railway so the API is not anonymously callable. This is separate from Telegram.
-- **`GATEWAY_ALLOW_ALL_USERS`** — Controls **messaging** (Telegram, Discord, Slack): whether *anyone* can talk to the bot. Keep `false` and use allowlists (e.g. `TELEGRAM_ALLOWED_USERS`) unless you fully understand the risk.
+The wrapper forwards that path to Hermes’s internal Bot Framework listener (port `3978` inside the container).
 
-## Hermes API usage after deploy
+## Telegram webhooks (optional)
 
-Use your Railway service URL as the base URL:
+Default is long polling (no public webhook URL required). For webhook mode, set in `/setup`:
 
-- Health (wrapper): `GET /setup/healthz`
-- Health (Hermes, proxied): `GET /health`
-- Models: `GET /v1/models`
-- Chat completions: `POST /v1/chat/completions`
+- `TELEGRAM_WEBHOOK_URL` = `https://<your-railway-domain>/telegram`
+- `TELEGRAM_WEBHOOK_SECRET` = a long random string
 
-Send `Authorization: Bearer <API_SERVER_KEY>` when the key is set.
+## HTTP API
 
-## Updating Hermes version
+| Endpoint | Description |
+| -------- | ------------- |
+| `GET /setup/healthz` | Wrapper + gateway readiness |
+| `GET /health` | Hermes health (proxied) |
+| `GET /v1/models` | Models list |
+| `POST /v1/chat/completions` | Chat |
 
-The image is pinned by `HERMES_REF` in `Dockerfile`. Change the tag and redeploy to rebuild.
+Set **`API_SERVER_KEY`** in `/setup` on any public URL.
 
-## Notes
+## Updating Hermes
 
-- This template targets **gateway + API** usage, not the interactive `hermes` TUI on the server.
-- WhatsApp/Signal need extra upstream setup beyond this template.
-- Without messaging tokens, Hermes still responds via the **HTTP API** only.
+Bump `HERMES_REF` in [`Dockerfile`](Dockerfile) (e.g. `v2026.5.16`) and redeploy. For a clean upgrade, use a new volume and re-run `/setup`.
+
+## Maintainer notes
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for process layout and ports.
