@@ -9,7 +9,8 @@ import {
   SECRET_KEYS,
 } from "./constants.js";
 import { getModelUiConfig, setDefaultModel } from "./config.js";
-import { ENV_FILE, getEnvUiConfig, isPlatformConfigured, upsertEnvVars } from "./env.js";
+import { ENV_FILE, getEnvUiConfig, isPlatformConfigured, loadEnvMap, upsertEnvVars } from "./env.js";
+import { getDefaultModel } from "./config.js";
 import {
   getHermesVersion,
   isHermesReady,
@@ -19,6 +20,7 @@ import {
 } from "./hermes-process.js";
 import { createProxies, getTelegramWebhookPath, proxyWeb } from "./proxy.js";
 import { renderSetupHtml } from "./setup-html.js";
+import { validateSetupValues } from "./validate-setup.js";
 
 const app = express();
 app.use(express.json({ limit: "2mb" }));
@@ -60,6 +62,26 @@ app.get("/setup/api/status", async (_req, res) => {
 
 app.post("/setup/api/save", async (req, res) => {
   const updates = req.body?.updates ?? {};
+
+  const envMap = loadEnvMap();
+  const formValues = {};
+  for (const key of MANAGED_ENV_KEYS) {
+    const submitted = key in updates ? String(updates[key] ?? "").trim() : "";
+    formValues[key] = submitted || envMap[key] || "";
+  }
+  const modelSubmitted = CONFIG_MODEL_KEY in updates ? String(updates[CONFIG_MODEL_KEY] ?? "").trim() : "";
+  formValues[CONFIG_MODEL_KEY] = modelSubmitted || getDefaultModel() || "";
+
+  const validation = validateSetupValues(formValues);
+  if (!validation.ok) {
+    res.status(400).json({
+      ok: false,
+      errors: validation.errors,
+      output: validation.errors.map((e) => e.message).join("\n"),
+    });
+    return;
+  }
+
   const envUpdates = {};
 
   for (const key of MANAGED_ENV_KEYS) {

@@ -7,6 +7,8 @@
 | **Node wrapper** (`src/server.js`) | Public HTTP on `PORT` (8080), `/setup` UI, reverse proxy |
 | **Hermes gateway** (`hermes gateway run --replace`) | Messaging adapters + internal services |
 
+This template is a **dedicated agent machine** (Railway container runs as root). `HERMES_ALLOW_ROOT_GATEWAY=1` opts into root gateway startup — Hermes otherwise refuses `gateway run` as root when `/opt/hermes/docker` exists.
+
 ## Internal ports (localhost)
 
 | Port | Service |
@@ -39,4 +41,4 @@ Volume at `/data/hermes` → `HERMES_HOME`. Entrypoint seeds `.env`, `config.yam
 
 ## Gateway startup
 
-Child env sets `API_SERVER_ENABLED=true` so a deploy with no messaging tokens still has a connected platform (API server).
+Child env sets `HERMES_ALLOW_ROOT_GATEWAY=1` and `API_SERVER_ENABLED=true` so a deploy with no messaging tokens still has a connected platform (API server).

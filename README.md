@@ -23,9 +23,8 @@ This is a **v2 greenfield** template. Use a **new Railway service** and a **new 
 1. Deploy from the Railway button (or fork this repo and connect it).
 2. Add a **volume** mounted at **`/data/hermes`**.
 3. Open **`https://<your-service>/setup`**.
-4. Set **OpenRouter API key** + **model** (writes `config.yaml`), then **Telegram** bot token + allowed user IDs.
-5. Click **Save and restart gateway**.
-6. Message your bot on Telegram.
+4. Follow **Step 1** (AI key + model) and **Step 2** (Telegram) on the setup page — optional sections can stay collapsed.
+5. Click **Save and restart gateway**, then message your bot on Telegram.
 
 ## How you chat
 

@@ -46,6 +46,8 @@ RUN npm ci --omit=dev
 COPY src ./src
 
 ENV HERMES_HOME=/data/hermes
+# Dedicated agent container (Railway runs as root). Hermes otherwise blocks gateway as root.
+ENV HERMES_ALLOW_ROOT_GATEWAY=1
 
 COPY scripts/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

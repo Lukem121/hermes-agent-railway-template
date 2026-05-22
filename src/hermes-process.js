@@ -18,6 +18,7 @@ export function buildChildEnv() {
   return {
     ...process.env,
     HERMES_HOME,
+    HERMES_ALLOW_ROOT_GATEWAY: "1",
     API_SERVER_ENABLED: "true",
     API_SERVER_HOST: INTERNAL_HOST,
     API_SERVER_PORT: String(INTERNAL_HERMES_API_PORT),

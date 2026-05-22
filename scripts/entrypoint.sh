@@ -4,6 +4,7 @@ set -e
 HERMES_HOME="${HERMES_HOME:-/data/hermes}"
 INSTALL_DIR="/opt/hermes"
 export HERMES_HOME
+export HERMES_ALLOW_ROOT_GATEWAY=1
 export PATH="/opt/hermes/.venv/bin:/root/.local/bin:${PATH}"
 export VIRTUAL_ENV="/opt/hermes/.venv"
 
@@ -32,7 +33,7 @@ if [ ! -f "$HERMES_HOME/SOUL.md" ] && [ -f "$INSTALL_DIR/docker/SOUL.md" ]; then
 fi
 
 if [ -d "$INSTALL_DIR/skills" ]; then
-  python3 "$INSTALL_DIR/tools/skills_sync.py"
+  python3 "$INSTALL_DIR/tools/skills_sync.py" || true
 fi
 
 exec "$@"
